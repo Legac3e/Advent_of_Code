@@ -7,13 +7,8 @@
 
 const char* INPUT_FILE = "input.txt";
 
-struct calibrated_values {
-    char first;
-    char last;
-};
-
-int getFirstDigit(std::string& s) {
-    for (auto it = s.begin(); it != s.end(); ++it) {
+int getFirstDigit(std::string& str) {
+    for (auto it = str.begin(); it < str.end(); it++) {
         if (std::isdigit(*it)) {
             return *it - '0';
         }
@@ -23,8 +18,8 @@ int getFirstDigit(std::string& s) {
     return -1;
 }
 
-int getLastDigit(const std::string& s) {
-    for (auto it = s.rbegin(); it != s.rend(); ++it) {
+int getLastDigit(const std::string& str) {
+    for (auto it = str.rbegin(); it < str.rend(); it++) {
         if (std::isdigit(*it)) {
             return *it - '0';
         }
@@ -37,7 +32,7 @@ int getLastDigit(const std::string& s) {
 int main() {
     std::ifstream inputfile(INPUT_FILE);
 
-    if (!inputfile.good()) {
+    if (!inputfile.is_open()) {
         std::cerr << "Failed to open the file." << std::endl;
         return 1;
     }
@@ -46,7 +41,7 @@ int main() {
     std::string line;
 
     while (std::getline(inputfile, line)) {
-        sum += 10*getFirstDigit(line) + getLastDigit(line);
+        sum += (10*getFirstDigit(line)) + getLastDigit(line);
     }
 
     std::cout << sum << std::endl;
