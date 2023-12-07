@@ -2,12 +2,13 @@
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <fstream>
 #include <cctype>
 
 const char* INPUT_FILE = "input.txt";
 
-int getFirstDigit(std::string& str) {
+int getFirstDigit(std::string_view str) {
     for (auto it = str.begin(); it < str.end(); it++) {
         if (std::isdigit(*it)) {
             return *it - '0';
@@ -18,7 +19,7 @@ int getFirstDigit(std::string& str) {
     return -1;
 }
 
-int getLastDigit(const std::string& str) {
+int getLastDigit(std::string_view str) {
     for (auto it = str.rbegin(); it < str.rend(); it++) {
         if (std::isdigit(*it)) {
             return *it - '0';
