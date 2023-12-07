@@ -23,40 +23,42 @@ digit_pair get_digits(std::string_view str) {
 
     for (auto it = str.begin(); it < str.end(); it++) {
         switch (*it) {
-            case 'z': { // "zero" b/c I still believe in 0, even if the elves don't
-                if (std::string_view(it, 4) == numbers[0]) { digits.last = 0; }
-            } break;
 
-            case 'o': { // "one"
-                if (std::string_view(it, 3) == numbers[1]) { digits.last = 1; }
-            } break;
+        case 'z': { // "zero" b/c I still believe in 0, even if the elves don't
+            if (std::string_view(it, 4) == numbers[0]) { digits.last = 0; }
+        } break;
 
-            case 't': { // "two", "three"
-                if (std::string_view(it, 3) == numbers[2]) { digits.last = 2; break; }
-                if (std::string_view(it, 5) == numbers[3]) { digits.last = 3; }
-            } break;
+        case 'o': { // "one"
+            if (std::string_view(it, 3) == numbers[1]) { digits.last = 1; }
+        } break;
 
-            case 'f': { // "four", "five"
-                if (std::string_view(it, 4) == numbers[4]) { digits.last = 4; break; }
-                if (std::string_view(it, 4) == numbers[5]) { digits.last = 5; }
-            } break;
+        case 't': { // "two", "three"
+            if (std::string_view(it, 3) == numbers[2]) { digits.last = 2; break; }
+            if (std::string_view(it, 5) == numbers[3]) { digits.last = 3; }
+        } break;
 
-            case 's': { // "six", "seven"
-                if (std::string_view(it, 3) == numbers[6]) { digits.last = 6; break; }
-                if (std::string_view(it, 5) == numbers[7]) { digits.last = 7; }
-            } break;
+        case 'f': { // "four", "five"
+            if (std::string_view(it, 4) == numbers[4]) { digits.last = 4; break; }
+            if (std::string_view(it, 4) == numbers[5]) { digits.last = 5; }
+        } break;
 
-            case 'e': { // "eight"
-                if (std::string_view(it, 5) == numbers[8]) { digits.last = 8; }
-            } break;
+        case 's': { // "six", "seven"
+            if (std::string_view(it, 3) == numbers[6]) { digits.last = 6; break; }
+            if (std::string_view(it, 5) == numbers[7]) { digits.last = 7; }
+        } break;
 
-            case 'n': { // "nine"
-                if (std::string_view(it, 4) == numbers[9]) { digits.last = 9; }
-            } break;
+        case 'e': { // "eight"
+            if (std::string_view(it, 5) == numbers[8]) { digits.last = 8; }
+        } break;
 
-            default: { // maybe it's an actual digit
-                if (std::isdigit(*it)) { digits.last = *it - '0'; }
-            } break;
+        case 'n': { // "nine"
+            if (std::string_view(it, 4) == numbers[9]) { digits.last = 9; }
+        } break;
+
+        default: { // maybe it's an actual digit
+            if (std::isdigit(*it)) { digits.last = *it - '0'; }
+        } break;
+
         }
 
         if (digits.first == -1) {
