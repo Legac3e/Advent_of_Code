@@ -35,6 +35,8 @@ digit_pair get_digits(std::string_view str) {
 }
 
 int main() {
+    int calibrationValue = 0;
+
     std::ifstream inputfile(INPUT_FILE);
 
     if (!inputfile.is_open()) {
@@ -42,16 +44,15 @@ int main() {
         exit(1);
     }
 
-    int sum = 0;
     std::string line;
 
     while (std::getline(inputfile, line)) {
         digit_pair digits = get_digits(line);
-        sum += (10*digits.first) + digits.last;
+        calibrationValue += (10*digits.first) + digits.last;
     }
 
-    std::cout << "Calibration value for part 1:\n" << sum << std::endl;
-
     inputfile.close();
+
+    std::cout << "Calibration value for part 1:\n" << calibrationValue << std::endl;
 }
 
