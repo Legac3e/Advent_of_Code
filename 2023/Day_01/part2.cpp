@@ -1,5 +1,6 @@
 // https://adventofcode.com/2023/day/1
 
+//#include <algorithm>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -7,127 +8,135 @@
 
 const char* INPUT_FILE = "input.txt";
 
-struct calibrated_values {
-    char first;
-    char last;
-};
+int getFirstDigit(const std::string& str) {
+    auto upto = str.end();
+    int value = -1;
+
+    // find first occurance of a literal digit
+    for (auto it = str.begin(); it < upto; it++) {
+        if (std::isdigit(*it)) {
+            upto = it;
+            value = *it - '0';
+            break;
+        }
+    }
+
+    // find first occurance of a digit as an english word
+    // (only going up to what we already found, or 3 before the end)
+    upto = std::min(upto, str.end()-3);
+
+    for (auto it = str.begin(); it < upto; it++) {
+        switch (*it) {
+            case 'o': {
+                if(*(it+1)=='n' && *(it+2)=='e') { return 1; };
+            } break;
+
+            case 't': {
+                if(*(it+1)=='w' && *(it+2)=='o') { return 2; };
+                if(it < (upto-2) && *(it+1)=='h' && *(it+2)=='r' && *(it+3)=='e' && *(it+4)=='e') { return 3; };
+            } break;
+
+            case 'f': {
+                if (it < (upto-1)) {
+                    if(*(it+1)=='o' && *(it+2)=='u' && *(it+3)=='r') { return 4; };
+                    if(*(it+1)=='i' && *(it+2)=='v' && *(it+3)=='e') { return 5; };
+                }
+            } break;
+
+            case 's': {
+                if(*(it+1)=='i' && *(it+2)=='x') { return 6; };
+                if(it < (upto-2) && *(it+1)=='e' && *(it+2)=='v' && *(it+3)=='e' && *(it+4)=='n') { return 7; };
+            } break;
+
+            case 'e': {
+                if(it < (upto-2) && *(it+1)=='i' && *(it+2)=='g' && *(it+3)=='h' && *(it+4)=='t') { return 8; };
+            } break;
+
+            case 'n': {
+                if(it < (upto-1) && *(it+1)=='i' && *(it+2)=='n' && *(it+3)=='e') { return 9; };
+            } break;
+        }
+    }
+
+    if (value == -1) {
+        std::cerr << "Unable to find the first digit." << std::endl;
+    }
+
+    return value;
+}
+
+int getLastDigit(std::string& str) {
+    auto upto = str.rend();
+    int value = -1;
+
+    // find first occurance of a literal digit
+    for (auto it = str.rbegin(); it < upto; it++) {
+        if (std::isdigit(*it)) {
+            upto = it;
+            value = *it - '0';
+            break;
+        }
+    }
+
+    // find first occurance of a digit as an english word
+    // (only going up to what we already found, or 3 before the end)
+    upto = std::min(upto, str.rend()-3);
+
+    for (auto it = str.rbegin(); it < upto; it++) {
+        switch (*it) {
+            case 'e': { // one, three, five, nine
+                if(*(it+1)=='n' && *(it+2)=='o') { return 1; };
+                if(it < (upto-1) && *(it+1)=='v' && *(it+2)=='i' && *(it+3)=='f') { return 5; };
+                if(it < (upto-1) && *(it+1)=='n' && *(it+2)=='i' && *(it+3)=='n') { return 9; };
+                if(it < (upto-2) && *(it+1)=='e' && *(it+2)=='r' && *(it+3)=='h' && *(it+4)=='t') { return 3; };
+            } break;
+
+            case 'o': { // two
+                if(*(it+1)=='w' && *(it+2)=='t') { return 2; };
+            } break;
+
+            case 'r': { // four
+                if (it < (upto-1) && *(it+1)=='u' && *(it+2)=='o' && *(it+3)=='f') { return 4; };
+            } break;
+
+            case 'x': { // six
+                if(*(it+1)=='i' && *(it+2)=='s') { return 6; };
+            } break;
+
+            case 'n': { // seven
+                if(it < (upto-2) && *(it+1)=='e' && *(it+2)=='v' && *(it+3)=='e' && *(it+4)=='s') { return 7; };
+            } break;
+
+            case 't': { // eight
+                if(it < (upto-2) && *(it+1)=='h' && *(it+2)=='g' && *(it+3)=='i' && *(it+4)=='e') { return 8; };
+            } break;
+        }
+    }
+
+    if (value == -1) {
+        std::cerr << "Unable to find the last digit." << std::endl;
+    }
+
+    return value;
+}
 
 int main() {
     std::ifstream inputfile(INPUT_FILE);
 
-    if (!inputfile.good()) {
+    if (!inputfile.is_open()) {
         std::cerr << "Failed to open the file." << std::endl;
         return 1;
     }
 
     int sum = 0;
     std::string line;
+
     while (std::getline(inputfile, line)) {
-        calibrated_values vals {0, 0};
-
-        for (size_t i = 0; i < line.size(); i++) {
-            switch (std::tolower(line[i])) {
-                case 'o': { //3
-                    if ((i+2) < line.size() && line[i+1] == 'n' && line[i+2] == 'e') {
-                        vals.last = '1';
-                        if (!vals.first) {
-                            vals.first = '1';
-                        }
-                    }
-                } break;
-
-                case 't': {// 3, 5
-                    if ((i+2) < line.size() && line[i+1] == 'w' && line[i+2] == 'o') {
-                        vals.last = '2';
-                        if (!vals.first) {
-                            vals.first = '2';
-                        }
-                    }
-
-                    if ((i+4) < line.size() && line[i+1] == 'h' && line[i+2] == 'r' && line[i+3] == 'e' && line[i+4] == 'e') {
-                        vals.last = '3';
-                        if (!vals.first) {
-                            vals.first = '3';
-                        }
-                    }
-                } break;
-
-                case 'f': { //4
-                    if ((i+3) < line.size() && line[i+1] == 'o' && line[i+2] == 'u' && line[i+3] == 'r') {
-                        vals.last = '4';
-                        if (!vals.first) {
-                            vals.first = '4';
-                        }
-                    }
-
-                    if ((i+3) < line.size() && line[i+1] == 'i' && line[i+2] == 'v' && line[i+3] == 'e') {
-                        vals.last = '5';
-                        if (!vals.first) {
-                            vals.first = '5';
-                        }
-                    }
-                } break;
-
-                case 's':{ //3
-                    if ((i+2) < line.size() && line[i+1] == 'i' && line[i+2] == 'x') {
-                        vals.last = '6';
-                        if (!vals.first) {
-                            vals.first = '6';
-                        }
-                    }
-
-                    if ((i+4) < line.size() && line[i+1] == 'e' && line[i+2] == 'v' && line[i+3] == 'e' && line[i+4] == 'n') {
-                        vals.last = '7';
-                        if (!vals.first) {
-                            vals.first = '7';
-                        }
-                    }
-                } break;
-
-                case 'e': {//5
-                    if ((i+4) < line.size() && line[i+1] == 'i' && line[i+2] == 'g' && line[i+3] == 'h' && line[i+4] == 't') {
-                        vals.last = '8';
-                        if (!vals.first) {
-                            vals.first = '8';
-                        }
-                    }
-                } break;
-
-                case 'n': {//4
-                    if ((i+3) < line.size() && line[i+1] == 'i' && line[i+2] == 'n' && line[i+3] == 'e') {
-                        vals.last = '9';
-                        if (!vals.first) {
-                            vals.first = '9';
-                        }
-                    }
-                } break;
-
-                /*
-                case 'z': {//4
-                    if ((i+4) < line.size() && line[i+1] == 'e' && line[i+2] == 'r' && line[i+3] == 'o') {
-                        vals.last = '0';
-                        if (!vals.first) {
-                            vals.first = '0';
-                        }
-                    }
-                } break;
-                */
-
-                default: {
-                    if (std::isdigit(line[i])) {
-                        vals.last = line[i];
-                        if (!vals.first) {
-                            vals.first = line[i];
-                        }
-                    }
-                } break;
-            }
-        }
-
-        sum += (10*(vals.first - '0')) + (vals.last - '0');
+        sum += (10*getFirstDigit(line)) + getLastDigit(line);
     }
 
     std::cout << sum << std::endl;
 
     inputfile.close();
 }
+
