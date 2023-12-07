@@ -1,51 +1,56 @@
 // https://adventofcode.com/2023/day/1
 
+#include <cstdint>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <string_view>
-#include <fstream>
-#include <cctype>
 
 const char* INPUT_FILE = "input.txt";
 
-int getFirstDigit(std::string_view str) {
+struct digit_pair {
+    int8_t first;
+    int8_t last;
+};
+
+digit_pair get_digits(std::string_view str) {
+    digit_pair digits {-1, -1};
+
     for (auto it = str.begin(); it < str.end(); it++) {
         if (std::isdigit(*it)) {
-            return *it - '0';
+            digits.last = *it - '0';
+
+            if (digits.first == -1) {
+                digits.first = digits.last;
+            }
         }
     }
 
-    std::cerr << "Unable to find the first digit." << std::endl;
-    return -1;
-}
-
-int getLastDigit(std::string_view str) {
-    for (auto it = str.rbegin(); it < str.rend(); it++) {
-        if (std::isdigit(*it)) {
-            return *it - '0';
-        }
+    if (!digits.first || !digits.last) {
+        std::cerr << "Error when finding the digits on line:\n\t" << str << std::endl;
+        exit(1);
     }
 
-    std::cerr << "Unable to find the last digit." << std::endl;
-    return -1;
+    return digits;
 }
 
 int main() {
     std::ifstream inputfile(INPUT_FILE);
 
     if (!inputfile.is_open()) {
-        std::cerr << "Failed to open the file." << std::endl;
-        return 1;
+        std::cerr << "Failed to open the file:\n\t" << INPUT_FILE << std::endl;
+        exit(1);
     }
 
     int sum = 0;
     std::string line;
 
     while (std::getline(inputfile, line)) {
-        sum += (10*getFirstDigit(line)) + getLastDigit(line);
+        digit_pair digits = get_digits(line);
+        sum += (10*digits.first) + digits.last;
     }
 
-    std::cout << sum << std::endl;
+    std::cout << "Calibration value for part 1:\n" << sum << std::endl;
 
     inputfile.close();
 }
