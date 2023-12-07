@@ -5,52 +5,24 @@
 #include <fstream>
 #include <cctype>
 
-const char* FILE_PART1 = "input.txt";
+const char* INPUT_FILE = "input.txt";
 
 struct calibrated_values {
     char first;
     char last;
 };
 
-void part1() {
-    std::ifstream inputFile(FILE_PART1);
+int main() {
+    std::ifstream inputfile(INPUT_FILE);
 
-    if (!inputFile) {
+    if (!inputfile.good()) {
         std::cerr << "Failed to open the file." << std::endl;
-        return;
+        return 1;
     }
 
     int sum = 0;
     std::string line;
-    while (std::getline(inputFile, line)) {
-        calibrated_values vals {0, 0};
-
-        for (char c : line) {
-            if (std::isdigit(c)) {
-                vals.last = c;
-                if (!vals.first) {
-                    vals.first = c;
-                }
-            }
-        }
-
-        sum += (10*(vals.first - '0')) + (vals.last - '0');
-    }
-
-    std::cout << sum << std::endl;
-}
-
-void part2() {
-    std::ifstream inputFile(FILE_PART1);
-
-    if (!inputFile) {
-        std::cerr << "Failed to open the file." << std::endl;
-        return;
-    }
-
-    int sum = 0;
-    std::string line;
-    while (std::getline(inputFile, line)) {
+    while (std::getline(inputfile, line)) {
         calibrated_values vals {0, 0};
 
         for (size_t i = 0; i < line.size(); i++) {
@@ -152,15 +124,10 @@ void part2() {
             }
         }
 
-        std::cout << vals.first << " - " << vals.last << std::endl;
         sum += (10*(vals.first - '0')) + (vals.last - '0');
     }
 
     std::cout << sum << std::endl;
-}
 
-int main() {
-    // part1();
-    part2();
+    inputfile.close();
 }
-
