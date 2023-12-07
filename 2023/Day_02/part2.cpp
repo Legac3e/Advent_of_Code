@@ -13,10 +13,9 @@ struct RGB_Cubes {
     int blue;
 };
 
-const RGB_Cubes reference = {.red=12, .green=13, .blue=14};
-
-bool isGamePossible(std::string_view str) {
-    RGB_Cubes cubes = {reference.red, reference.green, reference.blue};
+int CalculateGamesPower(std::string_view str) {
+    RGB_Cubes highest = {0, 0, 0};
+    RGB_Cubes cubes = {0, 0, 0};
 
     auto it = str.begin();
 
@@ -25,7 +24,10 @@ bool isGamePossible(std::string_view str) {
     for (; it < str.end(); it++) {
         if (!std::isdigit(*it)) {
             if (*it == ';') {
-                cubes = {reference.red, reference.green, reference.blue};
+                highest.red = std::max(highest.red, cubes.red);
+                highest.green = std::max(highest.green, cubes.green);
+                highest.blue = std::max(highest.blue, cubes.blue);
+                cubes = {0, 0, 0};
             }
 
             continue;
@@ -41,18 +43,15 @@ bool isGamePossible(std::string_view str) {
 
         switch (*(it+2)) {
             case 'r': {
-                cubes.red -= numCubes;
-                if (cubes.red < 0) { return false; }
+                cubes.red += numCubes;
             } break;
 
             case 'g': {
-                cubes.green -= numCubes;
-                if (cubes.green < 0) { return false; }
+                cubes.green += numCubes;
             } break;
 
             case 'b': {
-                cubes.blue -= numCubes;
-                if (cubes.blue < 0) { return false; }
+                cubes.blue += numCubes;
             } break;
 
             default: {
@@ -60,12 +59,13 @@ bool isGamePossible(std::string_view str) {
         }
     }
 
-    return true;
+    return std::max(highest.red, cubes.red)
+         * std::max(highest.green, cubes.green)
+         * std::max(highest.blue, cubes.blue);
 }
 
 int main() {
-    int gameIDSum = 0;
-    int gameID = 0;
+    int powerSum = 0;
 
     std::ifstream inputfile(INPUT_FILE);
 
@@ -78,15 +78,11 @@ int main() {
     std::string line;
 
     while (std::getline(inputfile, line)) {
-        gameID++;
-
-        if (isGamePossible(line)) {
-            gameIDSum += gameID;
-        }
+        powerSum += CalculateGamesPower(line);
     }
 
     inputfile.close();
 
-    std::cout << "Sum of possible Game IDs for part 1:\n" << gameIDSum << std::endl;
+    std::cout << "Sum of the power levels for all Games in part 1:\n" << powerSum << std::endl;
 }
 
