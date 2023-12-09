@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-//#include <string_view>
 #include <vector>
 #include <stdio.h>
 
@@ -34,12 +33,12 @@ int main() {
     // and store its location for easy processing in the next step
     for (size_t row = 0; row < engineBoard.size(); row++) {
         for (size_t col = 0; col < engineBoard[row].size(); col++) {
-            if (!std::isdigit(engineBoard[row][col])) { continue; }
+            if (!std::isdigit(engineBoard[row][col])) {
+                continue;
+            }
 
-            parts.emplace_back();
+            parts.emplace_back(enginePart{row, col, 0, 0, false});
             enginePart& part = parts.back();
-            part.row=row;
-            part.col=col;
 
             sscanf(&engineBoard[row][col], "%d%n", &part.value, &part.length);
 
