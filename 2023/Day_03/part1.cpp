@@ -9,20 +9,16 @@
 
 const char* INPUT_FILE = "input.txt";
 
-struct position {
-    int row;
-    int col;
-};
-
 struct enginePart {
-    position pos {.row=-1, .col=-1};
+    size_t row{0};
+    size_t col{0};
     int value{0};
-    int length {0};
+    int length{0};
     bool found{false};
 };
 
 int main() {
-    std::vector<enginePart> candidateParts;
+    std::vector<enginePart> parts;
     std::vector<std::string> engineBoard;
 
     std::ifstream inputfile(INPUT_FILE);
@@ -34,67 +30,44 @@ int main() {
 
     while (std::getline(inputfile, engineBoard.emplace_back())) {}
 
+    // find all groups of digits and extract the integer value,
+    // and store its location for easy processing in the next step
     for (size_t row = 0; row < engineBoard.size(); row++) {
         for (size_t col = 0; col < engineBoard[row].size(); col++) {
             if (!std::isdigit(engineBoard[row][col])) { continue; }
 
-            candidateParts.emplace_back();
-            candidateParts.back().pos.row=row;
-            candidateParts.back().pos.col=col;
+            parts.emplace_back();
+            enginePart& part = parts.back();
+            part.row=row;
+            part.col=col;
 
-            sscanf(&engineBoard[row][col], "%d%n", &candidateParts.back().value, &candidateParts.back().length);
+            sscanf(&engineBoard[row][col], "%d%n", &part.value, &part.length);
 
-            col += candidateParts.back().length;
+            col += part.length;
 
-            if (candidateParts.back().pos.col >= 1) {
-                candidateParts.back().pos.col--;
-                candidateParts.back().length++;
+            // if we can scan one character before, make that the new start
+            if (part.col >= 1) {
+                part.col--;
+                part.length++;
             }
 
-            if (candidateParts.back().pos.col + candidateParts.back().length + 1 < engineBoard[row].size()) {
-                candidateParts.back().length++;
+            // if we can scan the next character, increase the bounds
+            if (part.col + part.length + 1 < engineBoard[row].size()) {
+                part.length++;
             }
         }
     }
 
     inputfile.close();
 
-    for (size_t i = 0; i < candidateParts.size(); i++) {
-        int row = candidateParts[i].pos.row;
-        int colOffset = candidateParts[i].pos.col;
-        char symbol;
-
-        if (row > 0) { // check above
-            for (int cCol = 0; cCol < candidateParts[i].length; cCol++) {
-                symbol = engineBoard[row-1][cCol+colOffset];
+    // process all of the numbers we found by scanning for symbols
+    // within 1 character of it. std::max and std::min clamp our rows
+    for (auto& part : parts) {
+        for (size_t rowOffset = std::max(int(part.row)-1, 0); !part.found && rowOffset <= std::min(int(part.row)+1, int(engineBoard.size()-1)); rowOffset++) {
+            for (size_t colOffset = 0; colOffset < part.length; colOffset++) {
+                char symbol = engineBoard[rowOffset][part.col+colOffset];
                 if (!std::isdigit(symbol) && symbol != '.') {
-                    candidateParts[i].found = true;
-                    break;
-                }
-            }
-        }
-
-        if (candidateParts[i].found) { continue; }
-
-        // check neighbors
-        symbol = engineBoard[row][colOffset];
-        if (!std::isdigit(symbol) && symbol != '.') {
-            candidateParts[i].found = true;
-            continue;
-        }
-
-        symbol = engineBoard[row][colOffset + candidateParts[i].length - 1];
-
-        if (!std::isdigit(symbol) && symbol != '.') {
-            candidateParts[i].found = true;
-            continue;
-        }
-
-        if (row + 1 < engineBoard.size()) { // check below
-            for (int cCol = 0; cCol < candidateParts[i].length; cCol++) {
-                symbol = engineBoard[row+1][cCol+colOffset];
-                if (!std::isdigit(symbol) && symbol != '.') {
-                    candidateParts[i].found = true;
+                    part.found = true;
                     break;
                 }
             }
@@ -102,15 +75,9 @@ int main() {
     }
 
     int enginePartSum = 0;
-    for (const auto& candPart : candidateParts) {
-        if (candPart.found) {
-            enginePartSum += candPart.value;
-
-            /*
-            std::cout << "candidate part w/ value: " << candPart.value
-                      << " and {row,col}: {" << candPart.pos.row << "," << candPart.pos.col << "}"
-                      << " and length " << candPart.length << "\n";
-            */
+    for (const auto& part : parts) {
+        if (part.found) {
+            enginePartSum += part.value;
         }
     }
 
