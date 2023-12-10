@@ -3,8 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <stdio.h>
-#include <cstdint>
 
 const char* INPUT_FILE = "input.txt";
 const int MAX_COPIES = 214;

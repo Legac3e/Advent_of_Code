@@ -4,7 +4,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <stdio.h>
 
 const char* INPUT_FILE = "input.txt";
 

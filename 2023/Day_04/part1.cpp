@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <stdio.h>
 
 const char* INPUT_FILE = "input.txt";
 
