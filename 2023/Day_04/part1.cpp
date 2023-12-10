@@ -21,12 +21,14 @@ int main() {
     while (std::getline(inputfile, line)) {
         bool winningTickets[100] = {0};
         size_t i;
-        bool processNums = false;
 
         for (i = 0; i < line.size(); i++) {
-            if (line[i] == ':') { processNums = true; continue; }
+            if (line[i] == ':') { i += 2; break; }
+        }
+
+        for (; i < line.size(); i++) {
             if (line[i] == '|') { break; }
-            if (!processNums || !std::isdigit(line[i])) { continue; }
+            if (!std::isdigit(line[i])) { continue; }
 
             int num;
             int len;
