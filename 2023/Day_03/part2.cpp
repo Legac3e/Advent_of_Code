@@ -48,15 +48,15 @@ int main() {
     for (auto& gear : gears) {
         numberIndex.clear();
 
-        for (size_t row = std::max(int(gear.row)-1, 0); row <= std::min(int(gear.row)+1, int(engineBoard.size()-1)); row++) {
+        for (size_t row = std::max(int(gear.row)-1, 0); int(row) <= std::min(int(gear.row)+1, int(engineBoard.size()-1)); row++) {
             bool foundnumber = false;
-            for (size_t col = std::max(int(gear.col)-1, 0); col <= std::min(int(gear.col)+1, int(engineBoard[row].size()-1)); col++) {
+            for (size_t col = std::max(int(gear.col)-1, 0); int(col) <= std::min(int(gear.col)+1, int(engineBoard[row].size()-1)); col++) {
                 if (std::isdigit(engineBoard[row][col])) {
                     if (!foundnumber) {
                         size_t tempcol = col;
 
                         // find the start of that number
-                        while(tempcol - 1 >= 0 && std::isdigit(engineBoard[row][tempcol-1])) {
+                        while(int(tempcol) - 1 >= 0 && std::isdigit(engineBoard[row][tempcol-1])) {
                             tempcol--;
                         }
 

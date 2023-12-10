@@ -1,13 +1,25 @@
-all: part1 part2 run
+CXX = g++
+CXXFLAGS = -std=c++2a -O2 -Wall -Wextra -Wpedantic -Werror
+LDFLAGS =
 
-part1: part1.cpp
-	g++ -O2 part1.cpp -o part1
+SRC1 = part1.cpp
+SRC2 = part2.cpp
 
-part2: part2.cpp
-	g++ -O2 part2.cpp -o part2
+EXE1 = part1
+EXE2 = part2
 
-run: part1 part2
-	@./part1 && ./part2
+all: $(EXE1) $(EXE2)
+
+$(EXE1): $(SRC1)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
+
+$(EXE2): $(SRC2)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
+
+run: $(EXE1) $(EXE2)
+	@$(EXE1) && $(EXE2)
 
 clean:
-	rm -f part1 part2
+	rm -f $(EXE1) $(EXE2)
+
+.PHONY: all clean

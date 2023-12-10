@@ -62,9 +62,10 @@ int main() {
     // process all of the numbers we found by scanning for symbols
     // within 1 character of it. std::max and std::min clamp our rows
     for (auto& part : parts) {
-        for (size_t rowOffset = std::max(int(part.row)-1, 0); !part.found && rowOffset <= std::min(int(part.row)+1, int(engineBoard.size()-1)); rowOffset++) {
-            for (size_t colOffset = 0; colOffset < part.length; colOffset++) {
+        for (size_t rowOffset = std::max(int(part.row)-1, 0); !part.found && int(rowOffset) <= std::min(int(part.row)+1, int(engineBoard.size()-1)); rowOffset++) {
+            for (size_t colOffset = 0; int(colOffset) < part.length; colOffset++) {
                 char symbol = engineBoard[rowOffset][part.col+colOffset];
+
                 if (!std::isdigit(symbol) && symbol != '.') {
                     part.found = true;
                     break;
