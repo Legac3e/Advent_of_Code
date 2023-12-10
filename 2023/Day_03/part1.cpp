@@ -44,14 +44,9 @@ int main() {
 
             col += part.length;
 
-            // if we can scan one character before, make that the new start
-            if (part.col >= 1) {
+            int temp = std::max(part.col-1, 0);
+            if (temp != part.col) {
                 part.col--;
-                part.length++;
-            }
-
-            // if we can scan the next character, increase the bounds
-            if (part.col + part.length + 1 < int(engineBoard[row].size())) {
                 part.length++;
             }
         }
@@ -62,9 +57,9 @@ int main() {
     // process all of the numbers we found by scanning for symbols
     // within 1 character of it. std::max and std::min clamp our rows
     for (auto& part : parts) {
-        for (int rowOffset = std::max(part.row-1, 0); !part.found && rowOffset <= std::min(part.row+1, int(engineBoard.size())-1); rowOffset++) {
-            for (int colOffset = 0; colOffset < part.length; colOffset++) {
-                char symbol = engineBoard[rowOffset][part.col+colOffset];
+        for (int row = std::max(part.row-1, 0); !part.found && row <= std::min(part.row+1, int(engineBoard.size())-1); row++) {
+            for (int col = part.col; col <= std::min(part.col+part.length, int(engineBoard[row].size())-1); col++) {
+                char symbol = engineBoard[row][col];
 
                 if (!std::isdigit(symbol) && symbol != '.') {
                     part.found = true;
