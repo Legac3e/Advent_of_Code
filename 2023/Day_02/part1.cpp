@@ -74,7 +74,6 @@ int main() {
         exit(1);
     }
 
-
     std::string line;
 
     while (std::getline(inputfile, line)) {

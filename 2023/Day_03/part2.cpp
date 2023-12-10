@@ -9,17 +9,17 @@
 const char* INPUT_FILE = "input.txt";
 
 struct gear {
-    size_t row{0};
-    size_t col{0};
+    int row{0};
+    int col{0};
 };
 
 struct numPos {
-    size_t row;
-    size_t col;
+    int row;
+    int col;
 };
 
 int main() {
-    size_t sumOfGearProducts = 0;
+    int64_t sumOfGearProducts = 0;
     std::vector<gear> gears;
     std::vector<std::string> engineBoard;
 
@@ -33,8 +33,8 @@ int main() {
     while (std::getline(inputfile, engineBoard.emplace_back())) {}
 
     // find all of the gears
-    for (size_t row = 0; row < engineBoard.size(); row++) {
-        for (size_t col = 0; col < engineBoard[row].size(); col++) {
+    for (int row = 0; row < int(engineBoard.size()); row++) {
+        for (int col = 0; col < int(engineBoard[row].size()); col++) {
             if (engineBoard[row][col] == '*') {
                 gears.emplace_back(gear{row, col});
             }
@@ -48,15 +48,15 @@ int main() {
     for (auto& gear : gears) {
         numberIndex.clear();
 
-        for (size_t row = std::max(int(gear.row)-1, 0); int(row) <= std::min(int(gear.row)+1, int(engineBoard.size()-1)); row++) {
+        for (int row = std::max(gear.row-1, 0); row <= std::min(gear.row+1, int(engineBoard.size())-1); row++) {
             bool foundnumber = false;
-            for (size_t col = std::max(int(gear.col)-1, 0); int(col) <= std::min(int(gear.col)+1, int(engineBoard[row].size()-1)); col++) {
+            for (int col = std::max(gear.col-1, 0); col <= std::min(gear.col+1, int(engineBoard[row].size())-1); col++) {
                 if (std::isdigit(engineBoard[row][col])) {
                     if (!foundnumber) {
-                        size_t tempcol = col;
+                        int tempcol = col;
 
                         // find the start of that number
-                        while(int(tempcol) - 1 >= 0 && std::isdigit(engineBoard[row][tempcol-1])) {
+                        while(tempcol - 1 >= 0 && std::isdigit(engineBoard[row][tempcol-1])) {
                             tempcol--;
                         }
 
