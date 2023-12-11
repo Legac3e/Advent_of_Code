@@ -6,6 +6,7 @@
 #include <vector>
 
 const size_t MAP_COUNT = 7;
+
 struct map_entry {
     uint dest;
     uint src;
@@ -22,7 +23,7 @@ int main() {
         exit(1);
     }
 
-    std::vector<uint> seeds;
+    std::vector<map_entry> seeds;
 
     std::string line;
     std::getline(inputfile, line);
@@ -35,12 +36,13 @@ int main() {
         }
 
         for (; i < line.size(); i++) {
-            int num;
+            uint seedStart;
+            uint seedRange;
             int len;
 
-            sscanf(&line[i], "%d%n", &num, &len);
+            sscanf(&line[i], "%u%u%n", &seedStart, &seedRange, &len);
 
-            seeds.emplace_back(num);
+            seeds.emplace_back(map_entry{seedStart, 0xFFFFFFFF, seedRange});
 
             i += len - 1;
         }
@@ -74,25 +76,29 @@ int main() {
     uint nearestLocation = 0xFFFFFFFF;
 
     for (size_t si = 0; si < seeds.size(); si++) {
-        uint dest = seeds[si];
+        map_entry currentSeed = seeds[si];
 
-        for (size_t ci = 0; ci < MAP_COUNT; ci++) {
-            for (size_t i = 0; i < mapCategories[ci].size(); i++) {
-                uint currentSource = mapCategories[ci][i].src;
-                uint currentRange = mapCategories[ci][i].range;
-                if (currentSource <= dest && dest <= currentSource+currentRange) {
-                    uint distanceFromSource = dest - currentSource;
-                    dest = mapCategories[ci][i].dest + distanceFromSource;
-                    break;
+        for (size_t j = 0; j < currentSeed.range; j++) {
+            uint dest = currentSeed.dest+j;
+
+            for (size_t ci = 0; ci < MAP_COUNT; ci++) {
+                for (size_t i = 0; i < mapCategories[ci].size(); i++) {
+                    uint currentSource = mapCategories[ci][i].src;
+                    uint currentRange = mapCategories[ci][i].range;
+                    if (currentSource <= dest && dest <= currentSource+currentRange) {
+                        uint distanceFromSource = dest - currentSource;
+                        dest = mapCategories[ci][i].dest + distanceFromSource;
+                        break;
+                    }
                 }
             }
-        }
 
-        if (dest < nearestLocation) {
-            nearestLocation = dest;
+            if (dest < nearestLocation) {
+                nearestLocation = dest;
+            }
         }
     }
 
-    std::cout << "Nearest location for part 1:\n" << nearestLocation << std::endl;
+    std::cout << "Nearest location for part 2:\n" << nearestLocation << std::endl;
 }
 
