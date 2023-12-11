@@ -6,8 +6,8 @@
 #include <vector>
 
 struct race_entry {
-    int time;
-    int recordDistance;
+    long long int time;
+    long long int recordDistance;
 };
 
 const char* INPUT_FILE = "input.txt";
@@ -29,14 +29,21 @@ int main() {
 
         size_t i;
         for (i = 0; i < line.size(); i++) {
-            if (line[i] == ':') { i += 2; break; }
+            if (line[i] == ':') { i += 1; break; }
+        }
+
+        for (size_t j = i; j < line.size(); j++) {
+            if (line[j] == ' ') {
+                line.erase(j, 1);
+                j = i;
+            }
         }
 
         for (; i < line.size(); i++) {
-            int num;
+            long long int num;
             int len;
 
-            sscanf(&line[i], "%d%n", &num, &len);
+            sscanf(&line[i], "%lld%n", &num, &len);
 
             if (raceNum == 0) {
                 races.emplace_back(race_entry{num, 0});
@@ -48,18 +55,15 @@ int main() {
         }
     }
 
-    int winProducts = 1;
+    long long int numWins = 0;
 
     for (const auto& race : races) {
-        int numWins = 0;
-
-        int i = 0;
+        long long int i = 0;
         while (i * (race.time-i) < race.recordDistance) { i++; }
 
         numWins = race.time-(2*i)+1;
-        winProducts *= numWins;
     }
 
-    std::cout << "Product of ways you could have won:\n" << winProducts << std::endl;
+    std::cout << "Ways you could have won:\n" << numWins << std::endl;
 }
 
