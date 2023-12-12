@@ -42,7 +42,7 @@ int main() {
 
         sscanf(&line[i], "%u%n", &seed, &numDigitsRead);
 
-        seeds.emplace_back(seed);
+        seeds.emplace_back(seedsize{seed});
 
         i += numDigitsRead - 1;
     }
@@ -60,7 +60,7 @@ int main() {
         seedsize dest, src, range;
         sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
-        mapLevels[mapIndex].emplace_back(dest, src, range);
+        mapLevels[mapIndex].emplace_back(map_entry{dest, src, range});
     }
 
     inputfile.close();

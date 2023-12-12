@@ -53,7 +53,7 @@ int main() {
         // [start, range] = [78, 14] ->
         // [start, end]   = [78, 78+14] = [78, 92]
         seedsize_t end = start+range;
-        seedRanges.emplace_back(start, end);
+        seedRanges.emplace_back(seed_range{start, end});
 
         i += numDigitsRead - 1;
     }
@@ -72,7 +72,7 @@ int main() {
         seedsize_t dest, src, range;
         sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
-        mapLevels[mapIndex].emplace_back(dest, src, range);
+        mapLevels[mapIndex].emplace_back(map_entry{dest, src, range});
     }
 
     inputfile.close();
@@ -100,7 +100,7 @@ int main() {
                 if (overlapStart >= overlapEnd) { continue; } // no overlap
 
                 seedsize_t newSeedOffset = map.dest - map.src; // or, how far away is src from the destination
-                newSeedRanges.emplace_back(overlapStart + newSeedOffset, overlapEnd + newSeedOffset);
+                newSeedRanges.emplace_back(seed_range{overlapStart + newSeedOffset, overlapEnd + newSeedOffset});
                 // we extracted this interval, no need for further processing within this interval
                 // for the current map (otherwise, that'd mean we have one input->two outputs)
 
@@ -108,12 +108,12 @@ int main() {
                     // we still need to process some of what came before the interval we just found
                     // so we reappend this into our OG seed ranges, incase some of the seeds
                     // that weren't captured in the current map could overlap with a different map
-                    seedRanges.emplace_back(start, overlapStart);
+                    seedRanges.emplace_back(seed_range{start, overlapStart});
                 }
 
                 if (end > overlapEnd) {
                     // same as above, but for values that come after the interval we just captured
-                    seedRanges.emplace_back(overlapEnd, end);
+                    seedRanges.emplace_back(seed_range{overlapEnd, end});
                 }
 
                 // because we did find a new interval, and cut the interval up into one or more
@@ -124,7 +124,7 @@ int main() {
 
             // we didn't find any overlapping intervals, so we can put the unaltered range into
             // the new seeds list, which will continue to be processed by the next levels of mapping.
-            newSeedRanges.emplace_back(start, end);
+            newSeedRanges.emplace_back(seed_range{start, end});
 
 foundNewInterval:
             continue;
