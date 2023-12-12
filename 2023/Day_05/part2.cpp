@@ -86,12 +86,10 @@ int main() {
                 seedsize overlapStart = std::max(start, mapSrc);
                 seedsize overlapEnd = std::min(end, mapSrc + mapRange);
 
-                if (overlapStart >= overlapEnd) {
-                    continue;
-                }
+                if (overlapStart >= overlapEnd) { continue; }
 
-                seedsize difference = mapDest - mapSrc;
-                remappedSeedRanges.emplace_back(overlapStart + difference, overlapEnd + difference);
+                seedsize mapDisplacement = mapDest - mapSrc;
+                remappedSeedRanges.emplace_back(overlapStart + mapDisplacement, overlapEnd + mapDisplacement);
 
                 if (overlapStart > start) {
                     seedRanges.emplace_back(start, overlapStart);
@@ -113,10 +111,10 @@ foundremapping:
         seedRanges = remappedSeedRanges;
     }
 
-    std::sort(seedRanges.begin(), seedRanges.end(),
-            [](const auto& seed1, const seed_range& seed2){ return seed1.start < seed2.start; });
-
-    seedsize nearestLocation = seedRanges.front().start;
+    seedsize nearestLocation = 0x7FFFFFFFFFFFFFFF;
+    for (const auto& sr : seedRanges) {
+        nearestLocation = std::min(nearestLocation, sr.start);
+    }
 
     auto end_time = std::chrono::high_resolution_clock::now();
     std::cout << "Nearest location for part 2:\n" << nearestLocation << std::endl;
