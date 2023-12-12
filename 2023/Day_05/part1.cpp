@@ -1,14 +1,16 @@
 // https://adventofcode.com/2023/day/5
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <array>
 #include <vector>
+#include <chrono>
 
 const size_t MAP_COUNT = 7;
 
-#define seedsize uint
+#define seedsize long
 
 struct map_entry {
     seedsize dest;
@@ -26,27 +28,24 @@ int main() {
         exit(1);
     }
 
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     std::vector<seedsize> seeds;
 
     std::string line;
     std::getline(inputfile, line);
 
-    { // read in the seeds
-        size_t i;
-        for (i = 0; i < line.size(); i++) {
-            if (line[i] == ':') { i += 2; break; }
-        }
+    for (size_t i = 0; i < line.size(); i++) { // read in the seeds
+        if (!std::isdigit(line[i])) { continue; }
 
-        for (; i < line.size(); i++) {
-            seedsize seed;
-            int seedlen;
+        int numDigitsRead;
+        seedsize seed;
 
-            sscanf(&line[i], "%u%n", &seed, &seedlen);
+        sscanf(&line[i], "%li%n", &seed, &numDigitsRead);
 
-            seeds.emplace_back(seed);
+        seeds.emplace_back(seed);
 
-            i += seedlen - 1;
-        }
+        i += numDigitsRead - 1;
     }
 
     std::array<std::vector<map_entry>, MAP_COUNT> mapEntries;
@@ -60,42 +59,40 @@ int main() {
         }
 
         seedsize dest, src, range;
-        sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
+        sscanf(line.c_str(), "%li %li %li", &dest, &src, &range);
 
         mapEntries[mapIndex].emplace_back(dest, src, range);
     }
 
-    /*
-    // prints out all of the map entries for all of the mapLevels
-    for (const auto& maplevel : mapEntries) {
-        std::cout << "[ ";
-        for (const auto& map : maplevel) {
-            std::cout << "[" << map.src << ", " << map.dest << ", " << map.src << "] ";
-        }
-        std::cout << "]" << std::endl;
-    }
-    */
-
     inputfile.close();
+
+    for (const auto& maps : mapEntries) {
+        std::vector<seedsize> remappedSeeds;
+
+        for (const auto& seed: seeds) {
+            for (const auto& map: maps) {
+                if (map.src <= seed && seed < map.src+map.range) {
+                    remappedSeeds.emplace_back(seed - map.src + map.dest);
+                    goto foundremapping;
+                }
+            }
+
+            remappedSeeds.emplace_back(seed);
+
+foundremapping:
+            continue;
+        }
+
+        seeds = remappedSeeds;
+    }
 
     seedsize nearestLocation = 0xFFFFFFFF;
 
-    for (const auto& s: seeds) {
-        seedsize dest = s;
+    std::sort(seeds.begin(), seeds.end());
+    nearestLocation = seeds.front();
 
-        for (const auto& maplevel : mapEntries) {
-            for (const auto& map : maplevel) {
-                if (map.src <= dest && dest < map.src+map.range) {
-                    seedsize offset = map.dest - map.src;
-                    dest += offset;
-                    break;
-                }
-            }
-        }
-
-        nearestLocation = std::min(nearestLocation, dest);
-    }
-
+    auto end_time = std::chrono::high_resolution_clock::now();
     std::cout << "Nearest location for part 1:\n" << nearestLocation << std::endl;
+    std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " nanoseconds" << std::endl;
 }
 

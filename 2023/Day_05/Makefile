@@ -1,5 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++2a -O2 -Wall -Wextra -Wpedantic -Werror
+#CXXFLAGS = -std=c++2a -ggdb -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined,address
 
 SRC1 = part1.cpp
 SRC2 = part2.cpp

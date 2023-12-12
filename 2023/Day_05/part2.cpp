@@ -1,16 +1,26 @@
 // https://adventofcode.com/2023/day/5
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <array>
 #include <vector>
+#include <chrono>
 
 const size_t MAP_COUNT = 7;
 
+#define seedsize long long int
+
+struct seed_range {
+    seedsize start;
+    seedsize end;
+};
+
 struct map_entry {
-    uint dest;
-    uint src;
-    uint range;
+    seedsize dest;
+    seedsize src;
+    seedsize range;
 };
 
 const char* INPUT_FILE = "input.txt";
@@ -23,82 +33,93 @@ int main() {
         exit(1);
     }
 
-    std::vector<map_entry> seeds;
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    std::vector<seed_range> seedRanges;
 
     std::string line;
     std::getline(inputfile, line);
-    bool incrementedType = false;
 
-    { // read in the seeds
-        size_t i;
-        for (i = 0; i < line.size(); i++) {
-            if (line[i] == ':') { i += 2; break; }
-        }
+    for (size_t i = 0; i < line.size(); i++) { // read in the seeds
+        if (!std::isdigit(line[i])) { continue; }
 
-        for (; i < line.size(); i++) {
-            uint seedStart;
-            uint seedRange;
-            int len;
+        int numDigitsRead;
+        seedsize start;
+        seedsize range;
 
-            sscanf(&line[i], "%u%u%n", &seedStart, &seedRange, &len);
+        sscanf(&line[i], "%lli %lli%n", &start, &range, &numDigitsRead);
 
-            seeds.emplace_back(map_entry{seedStart, 0xFFFFFFFF, seedRange});
+        seedsize end = start+range;
+        seedRanges.emplace_back(start, end);
 
-            i += len - 1;
-        }
-
-        incrementedType = true;
+        i += numDigitsRead - 1;
     }
 
-    size_t mapCategoryIndex = 0;
-
-    std::vector<map_entry> mapCategories[MAP_COUNT];
+    std::array<std::vector<map_entry>, MAP_COUNT> mapEntries;
+    size_t mapIndex = -1;
 
     while (std::getline(inputfile, line)) {
-        if (!std::isdigit(line[0])) {
-            if (!incrementedType) {
-                mapCategoryIndex++;
-                incrementedType = true;
-            }
-
+        if (!std::isdigit(line[0])) { // consume 2 lines if the input doesn't start with a number
+            std::getline(inputfile, line);
+            mapIndex++;
             continue;
         }
 
-        incrementedType = false;
-        mapCategories[mapCategoryIndex].emplace_back();
-        map_entry& map = mapCategories[mapCategoryIndex].back();
+        seedsize dest, src, range;
+        sscanf(line.c_str(), "%lli %lli %lli", &dest, &src, &range);
 
-        sscanf(line.c_str(), "%u %u %u", &map.dest, &map.src, &map.range);
+        mapEntries[mapIndex].emplace_back(dest, src, range);
     }
 
     inputfile.close();
 
-    uint nearestLocation = 0xFFFFFFFF;
+    for (const auto& ranges: mapEntries) {
+        std::vector<seed_range> remappedSeedRanges;
 
-    for (size_t si = 0; si < seeds.size(); si++) {
-        map_entry currentSeed = seeds[si];
+        while (!seedRanges.empty()) {
+            const auto [start, end] = seedRanges.back();
+            seedRanges.pop_back();
 
-        for (size_t j = 0; j < currentSeed.range; j++) {
-            uint dest = currentSeed.dest+j;
+            for (const auto& range : ranges) {
+                const auto& [mapDest, mapSrc, mapRange] = range;
 
-            for (size_t ci = 0; ci < MAP_COUNT; ci++) {
-                for (size_t i = 0; i < mapCategories[ci].size(); i++) {
-                    uint currentSource = mapCategories[ci][i].src;
-                    uint currentRange = mapCategories[ci][i].range;
-                    if (currentSource <= dest && dest <= currentSource+currentRange) {
-                        uint distanceFromSource = dest - currentSource;
-                        dest = mapCategories[ci][i].dest + distanceFromSource;
-                        break;
-                    }
+                seedsize overlapStart = std::max(start, mapSrc);
+                seedsize overlapEnd = std::min(end, mapSrc + mapRange);
+
+                if (overlapStart >= overlapEnd) {
+                    continue;
                 }
+
+                seedsize difference = mapDest - mapSrc;
+                remappedSeedRanges.emplace_back(overlapStart + difference, overlapEnd + difference);
+
+                if (overlapStart > start) {
+                    seedRanges.emplace_back(start, overlapStart);
+                }
+
+                if (end > overlapEnd) {
+                    seedRanges.emplace_back(overlapEnd, end);
+                }
+
+                goto foundremapping;
             }
 
-            if (dest < nearestLocation) {
-                nearestLocation = dest;
-            }
+            remappedSeedRanges.emplace_back(start, end);
+
+foundremapping:
+            continue;
         }
+
+        seedRanges = remappedSeedRanges;
     }
 
+    std::sort(seedRanges.begin(), seedRanges.end(),
+            [](const auto& seed1, const seed_range& seed2){ return seed1.start < seed2.start; });
+
+    seedsize nearestLocation = seedRanges.front().start;
+
+    auto end_time = std::chrono::high_resolution_clock::now();
     std::cout << "Nearest location for part 2:\n" << nearestLocation << std::endl;
+    std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " nanoseconds" << std::endl;
 }
 
