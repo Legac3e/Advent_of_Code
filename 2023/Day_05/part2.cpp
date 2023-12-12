@@ -49,14 +49,17 @@ int main() {
 
         sscanf(&line[i], "%u %u%n", &start, &range, &numDigitsRead);
 
+        // [start, range] = [78, 14] ->
+        // [start, end]   = [78, 92]
         seedsize end = start+range;
         seedRanges.emplace_back(start, end);
 
         i += numDigitsRead - 1;
     }
 
+    // level 0 is seed->soil, level 1 is soil->fertilizer, etc.
     std::array<std::vector<map_entry>, MAP_COUNT> mapLevels;
-    size_t mapIndex = -1;
+    size_t mapIndex = -1; // size_t max, which will overflow to 0 in the first iteration below
 
     while (std::getline(inputfile, line)) {
         if (!std::isdigit(line[0])) { // consume 2 lines if the input doesn't start with a number
@@ -74,44 +77,60 @@ int main() {
     inputfile.close();
 
     for (const auto& mapLevel: mapLevels) {
-        std::vector<seed_range> remappedSeedRanges;
+        // for each mapping level, we will create a new vector of
+        // what seed ranges there are when accounting for transformations
+        // that occur in this map (which then propogate to future maps)
+        std::vector<seed_range> newSeedRanges;
 
         while (!seedRanges.empty()) {
+            // we will process every seed value we have so far and we will only
+            // reinsert the original values into the new seeds ranges vector if
+            // we don't find any overlap in the current list of maps
             const auto [start, end] = seedRanges.back();
-            seedRanges.pop_back();
+            seedRanges.pop_back(); // just get rid of this value to reduce complex checks later
 
             for (const auto& map : mapLevel) {
-                const auto& [mapDest, mapSrc, mapRange] = map;
-
-                seedsize overlapStart = std::max(start, mapSrc);
-                seedsize overlapEnd = std::min(end, mapSrc + mapRange);
+                seedsize overlapStart = std::max(start, map.src);
+                seedsize overlapEnd = std::min(end, map.src + map.range);
 
                 if (overlapStart >= overlapEnd) { continue; }
 
-                seedsize mapDisplacement = mapDest - mapSrc;
-                remappedSeedRanges.emplace_back(overlapStart + mapDisplacement, overlapEnd + mapDisplacement);
+                seedsize offset = map.dest - map.src;
+                newSeedRanges.emplace_back(overlapStart + offset, overlapEnd + offset);
+                // we extracted this interval, no need for further processing within this interval
+                // for the current map (otherwise, that'd mean we have one input->two outputs)
 
                 if (overlapStart > start) {
+                    // we still need to process some of what came before the interval we just found
+                    // so we reappend this into our OG seed ranges, incase some of the seeds
+                    // that weren't captured in the current map could overlap with a different map
                     seedRanges.emplace_back(start, overlapStart);
                 }
 
                 if (end > overlapEnd) {
+                    // same as above, but for values that come after the interval we just captured
                     seedRanges.emplace_back(overlapEnd, end);
                 }
 
-                goto foundremapping;
+                // because we did find a new interval, and cut the interval up into one or more
+                // pieces, we can skip putting the entire original interval to be processed by
+                // the next map... that'd undo a lot of what we are trying to accomplish :P
+                goto foundNewInterval;
             }
 
-            remappedSeedRanges.emplace_back(start, end);
+            // we didn't find any overlapping intervals, so we can put the unaltered range into
+            // the new seeds list, which will continue to be processed by the next levels of mapping.
+            newSeedRanges.emplace_back(start, end);
 
-foundremapping:
+foundNewInterval:
             continue;
         }
 
-        seedRanges = remappedSeedRanges;
+        // seedRanges is empty, so we repopulate it with all our new intervals for the next stage
+        seedRanges = newSeedRanges;
     }
 
-    seedsize nearestLocation = 0x7FFFFFFF;
+    seedsize nearestLocation = 0xFFFFFFFF; // unsigned int max
     for (const auto& sr : seedRanges) {
         nearestLocation = std::min(nearestLocation, sr.start);
     }
