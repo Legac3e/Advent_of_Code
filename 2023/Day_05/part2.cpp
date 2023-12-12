@@ -77,11 +77,12 @@ int main() {
 
     inputfile.close();
 
+    std::vector<seed_range> newSeedRanges;
     for (const auto& mapLevel: mapLevels) {
         // for each mapping level, we will create a new vector of
         // what seed ranges there are when accounting for transformations
         // that occur in this map (which then propogate to future maps)
-        std::vector<seed_range> newSeedRanges;
+        newSeedRanges.clear();
 
         while (!seedRanges.empty()) {
             // we will process every seed value we have so far and we will only
