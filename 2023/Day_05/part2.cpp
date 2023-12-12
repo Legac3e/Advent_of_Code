@@ -51,7 +51,7 @@ int main() {
         sscanf(&line[i], "%u %u%n", &start, &range, &numDigitsRead);
 
         // [start, range] = [78, 14] ->
-        // [start, end]   = [78, 92]
+        // [start, end]   = [78, 78+14] = [78, 92]
         seedsize_t end = start+range;
         seedRanges.emplace_back(start, end);
 
