@@ -3,13 +3,17 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <array>
 #include <vector>
 
 const size_t MAP_COUNT = 7;
+
+#define seedsize uint
+
 struct map_entry {
-    uint dest;
-    uint src;
-    uint range;
+    seedsize dest;
+    seedsize src;
+    seedsize range;
 };
 
 const char* INPUT_FILE = "input.txt";
@@ -22,11 +26,10 @@ int main() {
         exit(1);
     }
 
-    std::vector<uint> seeds;
+    std::vector<seedsize> seeds;
 
     std::string line;
     std::getline(inputfile, line);
-    bool incrementedType = false;
 
     { // read in the seeds
         size_t i;
@@ -35,62 +38,62 @@ int main() {
         }
 
         for (; i < line.size(); i++) {
-            int num;
-            int len;
+            seedsize seed;
+            int seedlen;
 
-            sscanf(&line[i], "%d%n", &num, &len);
+            sscanf(&line[i], "%u%n", &seed, &seedlen);
 
-            seeds.emplace_back(num);
+            seeds.emplace_back(seed);
 
-            i += len - 1;
+            i += seedlen - 1;
         }
-
-        incrementedType = true;
     }
 
-    size_t mapCategoryIndex = 0;
-
-    std::vector<map_entry> mapCategories[MAP_COUNT];
+    std::array<std::vector<map_entry>, MAP_COUNT> mapEntries;
+    size_t mapIndex = -1;
 
     while (std::getline(inputfile, line)) {
-        if (!std::isdigit(line[0])) {
-            if (!incrementedType) {
-                mapCategoryIndex++;
-                incrementedType = true;
-            }
-
+        if (!std::isdigit(line[0])) { // consume 2 lines if the input doesn't start with a number
+            std::getline(inputfile, line);
+            mapIndex++;
             continue;
         }
 
-        incrementedType = false;
-        mapCategories[mapCategoryIndex].emplace_back();
-        map_entry& map = mapCategories[mapCategoryIndex].back();
+        seedsize dest, src, range;
+        sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
-        sscanf(line.c_str(), "%u %u %u", &map.dest, &map.src, &map.range);
+        mapEntries[mapIndex].emplace_back(dest, src, range);
     }
+
+    /*
+    // prints out all of the map entries for all of the mapLevels
+    for (const auto& maplevel : mapEntries) {
+        std::cout << "[ ";
+        for (const auto& map : maplevel) {
+            std::cout << "[" << map.src << ", " << map.dest << ", " << map.src << "] ";
+        }
+        std::cout << "]" << std::endl;
+    }
+    */
 
     inputfile.close();
 
-    uint nearestLocation = 0xFFFFFFFF;
+    seedsize nearestLocation = 0xFFFFFFFF;
 
-    for (size_t si = 0; si < seeds.size(); si++) {
-        uint dest = seeds[si];
+    for (const auto& s: seeds) {
+        seedsize dest = s;
 
-        for (size_t ci = 0; ci < MAP_COUNT; ci++) {
-            for (size_t i = 0; i < mapCategories[ci].size(); i++) {
-                uint currentSource = mapCategories[ci][i].src;
-                uint currentRange = mapCategories[ci][i].range;
-                if (currentSource <= dest && dest <= currentSource+currentRange) {
-                    uint distanceFromSource = dest - currentSource;
-                    dest = mapCategories[ci][i].dest + distanceFromSource;
+        for (const auto& maplevel : mapEntries) {
+            for (const auto& map : maplevel) {
+                if (map.src <= dest && dest < map.src+map.range) {
+                    seedsize offset = map.dest - map.src;
+                    dest += offset;
                     break;
                 }
             }
         }
 
-        if (dest < nearestLocation) {
-            nearestLocation = dest;
-        }
+        nearestLocation = std::min(nearestLocation, dest);
     }
 
     std::cout << "Nearest location for part 1:\n" << nearestLocation << std::endl;
