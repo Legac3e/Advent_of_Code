@@ -47,7 +47,7 @@ int main() {
         i += numDigitsRead - 1;
     }
 
-    std::array<std::vector<map_entry>, MAP_COUNT> mapEntries;
+    std::array<std::vector<map_entry>, MAP_COUNT> mapLevels;
     size_t mapIndex = -1;
 
     while (std::getline(inputfile, line)) {
@@ -60,7 +60,7 @@ int main() {
         seedsize dest, src, range;
         sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
-        mapEntries[mapIndex].emplace_back(dest, src, range);
+        mapLevels[mapIndex].emplace_back(dest, src, range);
     }
 
     inputfile.close();
@@ -70,8 +70,8 @@ int main() {
     for (const auto& s: seeds) {
         seedsize dest = s;
 
-        for (const auto& maplevel : mapEntries) {
-            for (const auto& map : maplevel) {
+        for (const auto& mapLevel : mapLevels) {
+            for (const auto& map : mapLevel) {
                 if (map.src <= dest && dest < map.src+map.range) {
                     seedsize offset = map.dest - map.src;
                     dest += offset;

@@ -55,7 +55,7 @@ int main() {
         i += numDigitsRead - 1;
     }
 
-    std::array<std::vector<map_entry>, MAP_COUNT> mapEntries;
+    std::array<std::vector<map_entry>, MAP_COUNT> mapLevels;
     size_t mapIndex = -1;
 
     while (std::getline(inputfile, line)) {
@@ -68,20 +68,20 @@ int main() {
         seedsize dest, src, range;
         sscanf(line.c_str(), "%lli %lli %lli", &dest, &src, &range);
 
-        mapEntries[mapIndex].emplace_back(dest, src, range);
+        mapLevels[mapIndex].emplace_back(dest, src, range);
     }
 
     inputfile.close();
 
-    for (const auto& ranges: mapEntries) {
+    for (const auto& mapLevel: mapLevels) {
         std::vector<seed_range> remappedSeedRanges;
 
         while (!seedRanges.empty()) {
             const auto [start, end] = seedRanges.back();
             seedRanges.pop_back();
 
-            for (const auto& range : ranges) {
-                const auto& [mapDest, mapSrc, mapRange] = range;
+            for (const auto& map : mapLevel) {
+                const auto& [mapDest, mapSrc, mapRange] = map;
 
                 seedsize overlapStart = std::max(start, mapSrc);
                 seedsize overlapEnd = std::min(end, mapSrc + mapRange);
