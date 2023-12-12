@@ -1,6 +1,5 @@
 // https://adventofcode.com/2023/day/5
 
-#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,7 +9,7 @@
 
 const size_t MAP_COUNT = 7;
 
-#define seedsize long
+#define seedsize uint
 
 struct map_entry {
     seedsize dest;
@@ -41,7 +40,7 @@ int main() {
         int numDigitsRead;
         seedsize seed;
 
-        sscanf(&line[i], "%li%n", &seed, &numDigitsRead);
+        sscanf(&line[i], "%u%n", &seed, &numDigitsRead);
 
         seeds.emplace_back(seed);
 
@@ -59,37 +58,30 @@ int main() {
         }
 
         seedsize dest, src, range;
-        sscanf(line.c_str(), "%li %li %li", &dest, &src, &range);
+        sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
         mapEntries[mapIndex].emplace_back(dest, src, range);
     }
 
     inputfile.close();
 
-    for (const auto& maps : mapEntries) {
-        std::vector<seedsize> remappedSeeds;
-
-        for (const auto& seed: seeds) {
-            for (const auto& map: maps) {
-                if (map.src <= seed && seed < map.src+map.range) {
-                    remappedSeeds.emplace_back(seed - map.src + map.dest);
-                    goto foundremapping;
-                }
-            }
-
-            remappedSeeds.emplace_back(seed);
-
-foundremapping:
-            continue;
-        }
-
-        seeds = remappedSeeds;
-    }
-
     seedsize nearestLocation = 0xFFFFFFFF;
 
-    std::sort(seeds.begin(), seeds.end());
-    nearestLocation = seeds.front();
+    for (const auto& s: seeds) {
+        seedsize dest = s;
+
+        for (const auto& maplevel : mapEntries) {
+            for (const auto& map : maplevel) {
+                if (map.src <= dest && dest < map.src+map.range) {
+                    seedsize offset = map.dest - map.src;
+                    dest += offset;
+                    break;
+                }
+            }
+        }
+
+        nearestLocation = std::min(nearestLocation, dest);
+    }
 
     auto end_time = std::chrono::high_resolution_clock::now();
     std::cout << "Nearest location for part 1:\n" << nearestLocation << std::endl;

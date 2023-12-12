@@ -26,14 +26,14 @@ struct map_entry {
 const char* INPUT_FILE = "input.txt";
 
 int main() {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     std::ifstream inputfile(INPUT_FILE);
 
     if (!inputfile.is_open()) {
         std::cerr << "Failed to open the file:\n\t" << INPUT_FILE << std::endl;
         exit(1);
     }
-
-    auto start_time = std::chrono::high_resolution_clock::now();
 
     std::vector<seed_range> seedRanges;
 
