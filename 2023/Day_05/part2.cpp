@@ -10,17 +10,17 @@
 
 const size_t MAP_COUNT = 7;
 
-#define seedsize unsigned int
+#define seedsize_t unsigned int
 
 struct seed_range {
-    seedsize start;
-    seedsize end;
+    seedsize_t start;
+    seedsize_t end;
 };
 
 struct map_entry {
-    seedsize dest;
-    seedsize src;
-    seedsize range;
+    seedsize_t dest;
+    seedsize_t src;
+    seedsize_t range;
 };
 
 const char* INPUT_FILE = "input.txt";
@@ -35,6 +35,7 @@ int main() {
         exit(1);
     }
 
+    // for all of the paired numbers that represent [seedstart, range]
     std::vector<seed_range> seedRanges;
 
     std::string line;
@@ -44,14 +45,14 @@ int main() {
         if (!std::isdigit(line[i])) { continue; }
 
         int numDigitsRead;
-        seedsize start;
-        seedsize range;
+        seedsize_t start;
+        seedsize_t range;
 
         sscanf(&line[i], "%u %u%n", &start, &range, &numDigitsRead);
 
         // [start, range] = [78, 14] ->
         // [start, end]   = [78, 92]
-        seedsize end = start+range;
+        seedsize_t end = start+range;
         seedRanges.emplace_back(start, end);
 
         i += numDigitsRead - 1;
@@ -68,7 +69,7 @@ int main() {
             continue;
         }
 
-        seedsize dest, src, range;
+        seedsize_t dest, src, range;
         sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
         mapLevels[mapIndex].emplace_back(dest, src, range);
@@ -84,19 +85,22 @@ int main() {
 
         while (!seedRanges.empty()) {
             // we will process every seed value we have so far and we will only
-            // reinsert the original values into the new seeds ranges vector if
-            // we don't find any overlap in the current list of maps
+            // reinsert the original values into the new seed ranges vector if
+            // we don't find any overlap in the current map level (vector of map_entries)
             const auto [start, end] = seedRanges.back();
             seedRanges.pop_back(); // just get rid of this value to reduce complex checks later
 
             for (const auto& map : mapLevel) {
-                seedsize overlapStart = std::max(start, map.src);
-                seedsize overlapEnd = std::min(end, map.src + map.range);
+                // -------     seed_range (start and end)
+                //     ------- map_entry  (src through src+range)
+                // ^   ^ ^     arrows point to start, overlapStart and end=overlapEnd respectively
+                seedsize_t overlapStart = std::max(start, map.src);
+                seedsize_t overlapEnd = std::min(end, map.src + map.range);
 
-                if (overlapStart >= overlapEnd) { continue; }
+                if (overlapStart >= overlapEnd) { continue; } // no overlap
 
-                seedsize offset = map.dest - map.src;
-                newSeedRanges.emplace_back(overlapStart + offset, overlapEnd + offset);
+                seedsize_t newSeedOffset = map.dest - map.src; // or, how far away is src from the destination
+                newSeedRanges.emplace_back(overlapStart + newSeedOffset, overlapEnd + newSeedOffset);
                 // we extracted this interval, no need for further processing within this interval
                 // for the current map (otherwise, that'd mean we have one input->two outputs)
 
@@ -130,7 +134,7 @@ foundNewInterval:
         seedRanges = newSeedRanges;
     }
 
-    seedsize nearestLocation = 0xFFFFFFFF; // unsigned int max
+    seedsize_t nearestLocation = 0xFFFFFFFF; // unsigned int max
     for (const auto& sr : seedRanges) {
         nearestLocation = std::min(nearestLocation, sr.start);
     }
