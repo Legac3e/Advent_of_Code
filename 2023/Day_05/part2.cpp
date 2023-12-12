@@ -10,7 +10,7 @@
 
 const size_t MAP_COUNT = 7;
 
-#define seedsize long long int
+#define seedsize unsigned int
 
 struct seed_range {
     seedsize start;
@@ -47,7 +47,7 @@ int main() {
         seedsize start;
         seedsize range;
 
-        sscanf(&line[i], "%lli %lli%n", &start, &range, &numDigitsRead);
+        sscanf(&line[i], "%u %u%n", &start, &range, &numDigitsRead);
 
         seedsize end = start+range;
         seedRanges.emplace_back(start, end);
@@ -66,7 +66,7 @@ int main() {
         }
 
         seedsize dest, src, range;
-        sscanf(line.c_str(), "%lli %lli %lli", &dest, &src, &range);
+        sscanf(line.c_str(), "%u %u %u", &dest, &src, &range);
 
         mapLevels[mapIndex].emplace_back(dest, src, range);
     }
@@ -111,7 +111,7 @@ foundremapping:
         seedRanges = remappedSeedRanges;
     }
 
-    seedsize nearestLocation = 0x7FFFFFFFFFFFFFFF;
+    seedsize nearestLocation = 0x7FFFFFFF;
     for (const auto& sr : seedRanges) {
         nearestLocation = std::min(nearestLocation, sr.start);
     }
